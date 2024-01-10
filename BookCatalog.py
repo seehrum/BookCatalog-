@@ -85,8 +85,8 @@ def main():
         elif choice == '2':
             search_term = input("Enter a search term (title, author, ISBN, category, sector): ")
             results = catalog.search_books(search_term)
+            print(f"\n\033[1mSearch Results - Total Found: {len(results)}\033[0m")
             if results:
-                print("\nSearch Results:")
                 for book in results:
                     print(f"Title: {book['title']}, Author: {book['author']}, ISBN: {book['isbn']}, Category: {book['category']}, Sector: {book['sector']}")
             else:
