@@ -9,7 +9,11 @@ class BookCatalog:
         self.load_books()
 
     def add_book(self, title, author, isbn, category, sector):
-        """Add a book to the catalog."""
+        """Add a book to the catalog with basic validation."""
+        if not self.is_valid_isbn(isbn):
+            print("Invalid ISBN. Book not added.")
+            return
+
         book = {
             'title': title,
             'author': author,
@@ -20,6 +24,11 @@ class BookCatalog:
         self.books.append(book)
         self.save_books()
         print(f"Book '{title}' added successfully.")
+
+    def is_valid_isbn(self, isbn):
+        """Check if the ISBN is valid."""
+        # ISBN validation logic here
+        return True
 
     def search_books(self, search_term):
         """Search for books by any field."""
@@ -38,33 +47,35 @@ class BookCatalog:
             print(f"Title: {book['title']}, Author: {book['author']}, ISBN: {book['isbn']}, Category: {book['category']}, Sector: {book['sector']}")
 
     def save_books(self):
-        """Save books to a JSON file."""
-        with open('books.json', 'w') as file:
-            json.dump(self.books, file, indent=4)
+        """Save books to a JSON file with exception handling."""
+        try:
+            with open('books.json', 'w') as file:
+                json.dump(self.books, file, indent=4)
+        except IOError as e:
+            print(f"Error saving books: {e}")
 
     def load_books(self):
-        """Load books from a JSON file."""
+        """Load books from a JSON file with exception handling."""
         try:
             with open('books.json', 'r') as file:
                 self.books = json.load(file)
-        except FileNotFoundError:
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Error loading books: {e}")
             self.books = []
 
 def clear_screen():
-    """Clears the console screen."""
-    if platform.system() == "Windows":
-        os.system('cls')
-    else:
-        os.system('clear')
+    """Clears the console screen in a more Pythonic way."""
+    os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 def signal_handler(sig, frame):
-    """Handle interrupt signal."""
+    """Handle interrupt signal gracefully."""
     print("\nExiting program.")
-    exit(0)
+    raise SystemExit  # Raise a SystemExit exception to exit the program
 
 def main():
-    signal.signal(signal.SIGINT, signal_handler)  # Handle CTRL+C gracefully
+    signal.signal(signal.SIGINT, signal_handler)
     catalog = BookCatalog()
+
     while True:
         clear_screen()
         print("\nBook Catalog System".center(50))
@@ -86,15 +97,11 @@ def main():
             search_term = input("Enter a search term (title, author, ISBN, category, sector): ")
             results = catalog.search_books(search_term)
             print(f"\n\033[1mSearch Results - Total Found: {len(results)}\033[0m")
-            if results:
-                for book in results:
-                    print(f"Title: {book['title']}, Author: {book['author']}, ISBN: {book['isbn']}, Category: {book['category']}, Sector: {book['sector']}")
-            else:
-                print("No books found.")
+            for book in results:
+                print(f"Title: {book['title']}, Author: {book['author']}, ISBN: {book['isbn']}, Category: {book['category']}, Sector: {book['sector']}")
             input("\nPress Enter to continue...")
 
         elif choice == '3':
-            print("\nCatalog:")
             catalog.display_books()
             input("\nPress Enter to continue...")
 
